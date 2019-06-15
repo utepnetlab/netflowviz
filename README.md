@@ -1,6 +1,8 @@
 # Netflowviz
 NetFlow data visualization website using a Node js server running python3 scripts to create visualization.
 
+![alt text](https://i.imgur.com/uOiwqLY.png)
+
 The file directory should be structured as illustrated below. Keep in mind that the "Generated Files" will be created once the visualization scripts are run.
 
 ![alt text](https://i.imgur.com/VHmdW06.png)
