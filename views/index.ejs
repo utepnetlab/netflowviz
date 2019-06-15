@@ -1,0 +1,562 @@
+<!--
+Author: Carlos Alcantara
+Index.html page with Express for NetFlow data visualization
+Version 2.0
+-->
+<html>
+<head>
+	<title>Netflow Visualization</title>
+	<link rel="stylesheet" href="DataVisualization.css">	
+</head>
+<body>
+	
+	<div id="logo">
+		<img src="UTEP.png" align="right" style="height:130px;">
+	</div>
+	<h1 style="padding: 40px;">Netflow Visualization</h1>
+	
+	<!-- Tab links -->
+	<div class="tab">
+		<button class="tablinks" onclick="openTab(event, 'Univariate')" id="defaultOpen">Univariate</button>
+		<button class="tablinks" onclick="openTab(event, 'Multivariate')">Multivariate</button>
+		<button class="tablinks" onclick="openTab(event, 'Geospatial')">Geo-spatial</button>
+		<button class="tablinks" onclick="openTab(event, 'Drilldown')">Drill-down</button>
+	</div>
+
+	<!-- Tab content -->
+	<div id="Univariate" class="tabcontent">
+		<form method="POST" action="/univariate"><br>
+			<div class="CSVfile">
+				<label>Netflow Dataset:</label>
+				<select class="select-css" id="univariateFile" name="univariateFile">
+					<% var options = csv; %>
+					<% for(var i = 0; i < csv.length; i++) { %>
+				    	<option value='<%= csv[i] %>'><%= csv[i] %></option>
+					<% } %>
+					<!-- <option value="ampath-i2.csv">ampath-i2.csv</option>
+					<option value="uky.csv">uky.csv</option>
+					<option value="uky_20180930_1700_1h.csv">uky_20180930_1700_1h.csv</option>
+					<option value="uky_20181004_1215_1h.csv">uky_20181004_1215_1h.csv</option>
+					<option value="uky_20181005_1000_1h.csv">uky_20181005_1000_1h.csv</option>
+					<option value="virgo_in_201803211405_2hr.csv">virgo_in_201803211405_2hr.csv</option>
+					<option value="virgo_in_201803231030_2hr.csv">virgo_in_201803231030_2hr.csv</option>
+					<option value="virgo_out_201803191900_2hr.csv">virgo_out_201803191900_2hr.csv</option>
+					<option value="virgo_out_201803211405_2hr.csv">virgo_out_201803211405_2hr.csv</option>
+					<option value="virgo_out_201803231030_2hr.csv">virgo_out_201803231030_2hr.csv</option>
+					<option value="temp.csv">temp.csv</option> -->
+				</select>
+			</div>
+			<div class="univariateSQLfilter" >
+				<input type="checkbox" id="univariateSQLoption" name='univariateSQLoption' value='false' onclick="univariateEnableFilter()">Enable SQL filter<br>
+				<textarea id="univariateSQLfilter" name="univariateSQLfilter" rows="3" cols="45" style="display:none"></textarea>
+				<p id="univariateSQLlabel" style="display:none"><br>This SQL filter only supports the SELECT keyword with the WHERE modifier<br>
+				Ex. "select * from netflowData where duration > 1000000"</p>
+			</div>
+			<div class="field">
+				<label>Variable</label>
+				<select class="select-css"  id="field" name="field">
+					<option value="srcport">Source Port</option>
+					<option value="dstport">Dest Port</option>
+					<option value="duration">Duration</option>
+					<option value="dPkts">dPkts</option>
+					<option value="dOctets">dOctets</option>
+				</select>
+			</div>
+			<div class="type" >
+				<label>Visualization Type</label>
+				<select class="select-css"  id="style" name="style">
+					<option value="violinplot">Violin Plot</option>
+					<option value="histogram">Histogram</option>
+					<option value="boxplot">Box Plot</option>
+				</select>
+			</div>
+			<button class="Submit">Submit</button>
+		</form>
+	</div>
+
+	<div id="Multivariate" class="tabcontent">
+	 	<div style="display: inline-block; padding: 5px; vertical-align: top; text-align: left; width: 31%; ">
+	 		<h3>Multivariate</h3>
+		 	<form method="POST" action="/multivariate">
+				<div class="CSVfile">
+					<label>Netflow Dataset:</label>
+					<select class="select-css"  id="multivariateFile" name="multivariateFile">
+						<% var options = csv; %>
+						<% for(var i = 0; i < csv.length; i++) { %>
+							<option value='<%= csv[i] %>'><%= csv[i] %></option>
+						<% } %>
+						<!-- <option value="ampath-i2.csv">ampath-i2.csv</option>
+						<option value="uky.csv">uky.csv</option>
+						<option value="uky_20180930_1700_1h.csv">uky_20180930_1700_1h.csv</option>
+						<option value="uky_20181004_1215_1h.csv">uky_20181004_1215_1h.csv</option>
+						<option value="uky_20181005_1000_1h.csv">uky_20181005_1000_1h.csv</option>
+						<option value="converted_virgo_in_201803211405_2hr.csv">virgo_in_201803211405_2hr.csv</option>
+						<option value="converted_virgo_out_201803191900_2hr.csv">virgo_out_201803191900_2hr.csv</option>
+						<option value="converted_virgo_out_201803211405_2hr.csv">virgo_out_201803211405_2hr.csv</option>
+						<option value="converted_virgo_out_201803231030_2hr.csv">virgo_out_201803231030_2hr.csv</option>
+						<option value="temp.csv">temp.csv</option> -->
+					</select>
+				</div><br>
+				<div class="multivariateSQLfilter" >
+				<input type="checkbox" id="multivariateSQLoption" name='multivariateSQLoption' value='false' onclick="multivariateEnableFilter()">Enable SQL filter<br>
+				<textarea id="multivariateSQLfilter" name="multivariateSQLfilter" rows="3" cols="45" style="display:none"></textarea><br>
+				<p id="multivariateSQLlabel" style="display:none">This SQL filter only supports the SELECT keyword with the WHERE modifier<br>
+				Ex. "select * from netflowData where duration > 1000000"</p>
+			</div><br>
+				<div class="xAxis">
+					<label>X Axis</label>
+					<select class="select-css"  id="xAxis" name="xAxis">
+						<option value="src_as">Source AS</option>
+						<option value="srcport">Source Port</option>
+						<option value="dst_as">Dest AS</option>
+						<option value="dstport">Dest Port</option>
+						<option value="duration">Duration</option>
+						<option value="dPkts">dPkts</option>
+						<option value="dOctets">dOctets</option>
+					</select>
+				</div><br>
+				<div class="yAxis">
+					<label>Y Axis</label>
+					<select class="select-css"  id="yAxis" name="yAxis">
+						<option value="src_as">Source AS</option>
+						<option value="srcport">Source Port</option>
+						<option value="dst_as" selected>Dest AS</option>
+						<option value="dstport">Dest Port</option>
+						<option value="duration">Duration</option>
+						<option value="dPkts">dPkts</option>
+						<option value="dOctets">dOctets</option>
+					</select>
+				</div><br>
+				<div class="zAxis">
+					<label>Color Code</label>
+					<select class="select-css"  id="zAxis" name="zAxis">
+						<option value="app">Application</option>
+						<option value="src_continent">Src Continent</option>
+						<option value="dst_continent">Dest Continent</option>
+					</select>
+				</div><br>
+				<div class="dotSize">
+					<label>Dot Size</label>
+					<select class="select-css"  id="dotSize" name="dotSize">
+						<option value="none">None</option>
+						<option value="duration">Duration</option>
+						<option value="dOctets">dOctets</option>
+						<option value="dPkts">dPkts</option>
+					</select>
+				</div><br>
+				<button class="submit">Submit</button>
+			</form>
+		</div>
+
+		<div id="verticalLine" style="width: 0px; border: 1px solid #CCC; height: 500px;transform: translateY(5%); display: inline-block;"></div>
+
+		<div style="display: inline-block; padding: 5px; vertical-align: top; text-align: left; width: 31%;">
+			<h3>Scatter Plot Matrix</h3>
+			<form id="scatterplotForm" method="POST" action="/scatterplot">
+				<div class="CSVfile">
+					<label>Netflow Dataset:</label>
+					<select class="select-css"  id="scatterplotFile" name="scatterplotFile">
+						<% var options = csv; %>
+						<% for(var i = 0; i < csv.length; i++) { %>
+					    	<option value='<%= csv[i] %>'><%= csv[i] %></option>
+						<% } %>
+						<!-- <option value="ampath-i2.csv">ampath-i2.csv</option>
+						<option value="uky.csv">uky.csv</option>
+						<option value="uky_20180930_1700_1h.csv">uky_20180930_1700_1h.csv</option>
+						<option value="uky_20181004_1215_1h.csv">uky_20181004_1215_1h.csv</option>
+						<option value="uky_20181005_1000_1h.csv">uky_20181005_1000_1h.csv</option>
+						<option value="converted_virgo_in_201803211405_2hr.csv">virgo_in_201803211405_2hr.csv</option>
+						<option value="converted_virgo_out_201803191900_2hr.csv">virgo_out_201803191900_2hr.csv</option>
+						<option value="converted_virgo_out_201803211405_2hr.csv">virgo_out_201803211405_2hr.csv</option>
+						<option value="converted_virgo_out_201803231030_2hr.csv">virgo_out_201803231030_2hr.csv</option>
+						<option value="temp.csv">temp.csv</option> -->
+					</select>
+				</div><br>
+				<div class="scatterplotSQLfilter" >
+				<input type="checkbox" id="scatterplotSQLoption" name='scatterplotSQLoption' value='false' onclick="scatterplotEnableFilter()">Enable SQL filter<br>
+				<textarea id="scatterplotSQLfilter" name="scatterplotSQLfilter" rows="3" cols="45" style="display:none"></textarea><br>
+				<p id="scatterplotSQLlabel" style="display:none">This SQL filter only supports the SELECT keyword with the WHERE modifier<br>
+				Ex. "select * from netflowData where duration > 1000000"</p>
+			</div><br>
+				<div class="variables">
+					<label>Select variables to compare</label><br><br>
+					<input type="checkbox" name="plotOption" value="duration">Duration<br>
+					<input type="checkbox" name="plotOption" value="srcport">Source Port<br>
+					<input type="checkbox" name="plotOption" value="dstport">Dest Port<br>
+					<input type="checkbox" name="plotOption" value="dPkts">Packets<br>
+					<input type="checkbox" name="plotOption" value="dOctets">Octets<br>
+					<input type="checkbox" name="plotOption" value="src_as">Source AS<br>
+					<input type="checkbox" name="plotOption" value="dst_as">Dest AS<br>
+				</div><br>
+				<button class="Submit">Submit</button>
+			</form>
+		</div>
+
+		<div id="verticalLine" style="width: 0px; border: 1px solid #CCC; height: 500px;transform: translateY(5%); display: inline-block;"></div>
+
+		<div style="display: inline-block; padding: 5px; vertical-align: top; text-align: left; width: 31%; ">
+	 		<h3>Bivariate Distribution</h3>
+		 	<form method="POST" action="/bivariate">
+				<div class="CSVfile">
+					<label>Netflow Dataset:</label>
+					<select class="select-css"  id="bivariateFile" name="bivariateFile">
+						<% var options = csv; %>
+						<% for(var i = 0; i < csv.length; i++) { %>
+				    		<option value='<%= csv[i] %>'><%= csv[i] %></option>
+						<% } %>
+						<!-- <option value="ampath-i2.csv">ampath-i2.csv</option>
+						<option value="uky.csv">uky.csv</option>
+						<option value="uky_20180930_1700_1h.csv">uky_20180930_1700_1h.csv</option>
+						<option value="uky_20181004_1215_1h.csv">uky_20181004_1215_1h.csv</option>
+						<option value="uky_20181005_1000_1h.csv">uky_20181005_1000_1h.csv</option>
+						<option value="converted_virgo_in_201803211405_2hr.csv">virgo_in_201803211405_2hr.csv</option>
+						<option value="converted_virgo_out_201803191900_2hr.csv">virgo_out_201803191900_2hr.csv</option>
+						<option value="converted_virgo_out_201803211405_2hr.csv">virgo_out_201803211405_2hr.csv</option>
+						<option value="converted_virgo_out_201803231030_2hr.csv">virgo_out_201803231030_2hr.csv</option>
+						<option value="temp.csv">temp.csv</option> -->
+					</select>
+				</div><br>
+				<div class="bivariateSQLfilter" >
+				<input type="checkbox" id="bivariateSQLoption" name='bivariateSQLoption' value='false' onclick="bivariateEnableFilter()">Enable SQL filter<br>
+				<textarea id="bivariateSQLfilter" name="bivariateSQLfilter" rows="3" cols="45" style="display:none"></textarea><br>
+				<p id="bivariateSQLlabel" style="display:none">This SQL filter only supports the SELECT keyword with the WHERE modifier<br>
+				Ex. "select * from netflowData where duration > 1000000"</p>
+			</div><br>
+				<div class="xAxis">
+					<label>X Axis</label>
+					<select class="select-css"  id="bivariateAxisX" name="bivariateAxisX">
+						<option value="src_as">Source AS</option>
+						<option value="srcport">Source Port</option>
+						<option value="dst_as">Dest AS</option>
+						<option value="dstport">Dest Port</option>
+						<option value="duration">Duration</option>
+						<option value="dPkts">dPkts</option>
+						<option value="dOctets">dOctets</option>
+					</select>
+				</div><br>
+				<div class="yAxis">
+					<label>Y Axis</label>
+					<select class="select-css"  id="bivariateAxisY" name="bivariateAxisY">
+						<option value="src_as">Source AS</option>
+						<option value="srcport">Source Port</option>
+						<option value="dst_as" selected>Dest AS</option>
+						<option value="dstport">Dest Port</option>
+						<option value="duration">Duration</option>
+						<option value="dPkts">dPkts</option>
+						<option value="dOctets">dOctets</option>
+					</select>
+				</div><br>
+				<button class="submit">Submit</button>
+			</form>
+		</div>
+
+	</div>
+
+	<div id="Geospatial" class="tabcontent">
+		<div style="display: inline-block; padding: 5px; vertical-align: top; text-align: left; width: 45%; ">
+			<form method="POST" action="/geo">
+				<h3>Main configuration</h3>
+				<div class="CSVfile">
+					<label>Netflow Dataset:</label>
+					<select class="select-css"  id="geoFile" name="geoFile">
+						<% var options = csv; %>
+						<% for(var i = 0; i < csv.length; i++) { %>
+				    		<option value='<%= csv[i] %>'><%= csv[i] %></option>
+						<% } %>
+						<!-- <option value="ampath-i2.csv">ampath-i2.csv</option>
+						<option value="uky.csv">uky.csv</option>
+						<option value="converted_virgo_in_201803211405_2hr.csv">virgo_in_201803211405_2hr.csv</option>
+						<option value="converted_virgo_out_201803191900_2hr.csv">virgo_out_201803191900_2hr.csv</option>
+						<option value="converted_virgo_out_201803211405_2hr.csv">virgo_out_201803211405_2hr.csv</option>
+						<option value="converted_virgo_out_201803231030_2hr.csv">virgo_out_201803231030_2hr.csv</option>
+						<option value="temp.csv">temp.csv</option> -->
+					</select><br><br>
+					<div class="geoSQLfilter" >
+						<input type="checkbox" id="geoSQLoption" name='geoSQLoption' value='false' onclick="geoEnableFilter()"> Enable SQL filter<br>
+						<textarea id="geoSQLfilter" name="geoSQLfilter" rows="3" cols="45" style="display:none" value=""></textarea><br>
+						<p id="geoSQLlabel" style="display:none">This SQL filter only supports the SELECT keyword with the WHERE modifier<br>
+					Ex. "select * from netflowData where duration > 1000000"</p>
+					</div><br>
+					<div>
+						<label>Geographic aggregation:</label>
+						<select class="select-css"  id="aggregation" name="aggregation">
+								<option value="none" selected>None</option>
+								<option value="continent">Continent</option>
+								<option value="country">Country</option>
+								<option value="region">Region/State</option>
+							</select>
+					</div><br>
+					<div>
+						<label>Add AS logos:</label>
+						<select class="select-css"  id="markerLogos" name="markerLogos">
+								<option value="false" selected>No</option>
+								<option value="true">Yes</option>
+							</select>
+					</div><br>
+						<label>Default Line Color:</label>
+						<select class="select-css"  id="defaultColor" name="defaultColor">
+							<option value="green" selected>Green</option>
+							<option value="red">Red</option>
+							<option value="purple">Purple</option>
+							<option value="blue">Blue</option>
+							<option value="yellow">Yellow</option>
+						</select>
+					</div><br>
+				<div class="colorLines">
+					<input type="checkbox" id="colorLineCheck" name='colorLineCheck' value='false' onclick="onCheckedColor()">
+					<label>Conditional Line Coloring</label><br>
+						<select class="select-css"  id="columnName" name="columnName" style="display:none">
+							<option value="duration" selected>Duration</option>
+							<option value="dPkts">dPkts</option>
+							<option value="dOctets">dOctets</option>
+						</select>
+						<select class="select-css"  id="condition" name="condition" style="display:none">
+							<option value=">" selected>></option>
+							<option value="<"><</option>
+							<option value="==">==</option>
+						</select>
+						<input type="text" id="conditionalValue" name="conditionalValue" value="0" style="display:none">
+						<select class="select-css"  id="conditionalColor" name="conditionalColor" style="display:none">
+							<option value="green">Green</option>
+							<option value="red" selected>Red</option>
+							<option value="purple">Purple</option>
+							<option value="blue">Blue</option>
+							<option value="yellow">Yellow</option>
+						</select>
+				</div><br>
+				<h3>Pop-up Table configuration</h3>
+				<div>
+					<label>Pop-up Plot Type</label>
+					<select class="select-css"  id="plotType" name="plotType">
+							<option value="bar">Bar</option>
+							<option value="scatter">Scatter</option>
+							<option value="cat">Cat</option>
+					</select>
+				</div>
+				<div class="xAxis">
+					<label>Pop-up Plot X Axis</label>
+						<select class="select-css"  id="geoAxisX" name="geoAxisX">
+							<option value="app" selected>App</option>
+							<option value="src_as">Source AS</option>
+							<option value="srcport">Source Port</option>
+							<option value="dst_as">Dest AS</option>
+							<option value="dstport">Dest Port</option>
+							<option value="duration">Duration</option>
+							<option value="dPkts">dPkts</option>
+							<option value="dOctets">dOctets</option>
+						</select>
+				</div>
+				<div class="yAxis">
+					<label>Pop-up Plot Y Axis</label>
+						<select class="select-css"  id="geoAxisY" name="geoAxisY">
+							<option value="src_as">Source AS</option>
+							<option value="srcport">Source Port</option>
+							<option value="dst_as">Dest AS</option>
+							<option value="dstport">Dest Port</option>
+							<option value="duration">Duration</option>
+							<option value="dPkts">dPkts</option>
+							<option value="dOctets" selected>dOctets</option>
+					</select>
+				</div><br>
+				<label>Pop-up Table Length </label><input type="text" name="popupLen" value="3" style="width: 40px;"><br>
+				<div class="sortvar">
+					<label>Sort Pop-up Table by:</label>
+						<select class="select-css"  id="sortvar" name="sortvar">
+							<option value="duration">Duration</option>
+							<option value="dPkts">dPkts</option>
+							<option value="dOctets" selected>dOctets</option>
+					</select>
+				</div><br>
+
+				<button onclick="geoSubmit()" class="submit">Submit</button>
+				<br>
+			</form>
+		</div>
+		<div id="verticalLine" style="width: 0px; border: 1px solid #CCC; height: 800px;transform: translateY(5%); display: inline-block;"></div>
+		<div style="display: inline-block; padding: 15px; vertical-align: top; text-align: left; width: 45%; ">
+		<h3>Instructions:</h3>
+			<p>This visualization generates a map from NetFlow data. The map consists of <b>markers</b> representing Autonomous Systems (ASs), Continents, Countries, or Regions and <b>lines</b> illustrating the communication between these entities.
+			<br><br>
+			Clicking on a <b>marker</b> will display a pop-up presenting information on that entity. For continent, country, or region aggregation the pop-up will show a list of the top ASs within that geographic aggregation.
+			<br><br>
+			Clicking on a <b>line</b> will display a pop-up presenting information on the communication between the interconnected entities. NetFlow data for the the top flows will be presented in a table.</p>
+			<br><br><br><br><br><br><br><br><div id="geoSubmit"></div>
+		</div>
+		
+	</div>
+
+	<div id="Drilldown" class="tabcontent">
+		<form method="POST" action="/continent"><br>
+			<div class="CSVfile">
+				<label>Netflow Dataset:</label>
+				<select class="select-css"  id="drilldownFile" name="drilldownFile">
+					<% var options = csv; %>
+					<% for(var i = 0; i < csv.length; i++) { %>
+				   		<option value='<%= csv[i] %>'><%= csv[i] %></option>
+					<% } %>
+						<!-- <option value="ampath-i2.csv" selected>ampath-i2.csv</option>
+					<option value="uky.csv">uky.csv</option>
+					<option value="uky_20180930_1700_1h.csv">uky_20180930_1700_1h.csv</option>
+					<option value="uky_20181004_1215_1h.csv">uky_20181004_1215_1h.csv</option>
+					<option value="uky_20181005_1000_1h.csv">uky_20181005_1000_1h.csv</option>
+					<option value="converted_virgo_in_201803211405_2hr.csv">virgo_in_201803211405_2hr.csv</option>
+					<option value="converted_virgo_out_201803191900_2hr.csv">virgo_out_201803191900_2hr.csv</option>
+					<option value="converted_virgo_out_201803211405_2hr.csv">virgo_out_201803211405_2hr.csv</option>
+					<option value="converted_virgo_out_201803231030_2hr.csv">virgo_out_201803231030_2hr.csv</option>
+					<option value="temp.csv">temp.csv</option> -->
+				</select>
+			</div><br>
+			<button class="submit">Submit</button>
+		</form>
+	</div>
+
+	<div id="footer" align="right">
+	<pre style="padding-right:10px;">
+	Website created by Carlos Alcantara
+	Find us on <a href="https://github.com/utepnetlab?tab=repositories">GitHub.</a></pre>
+	</div>
+	<br><br>
+</body>
+<script>
+	// Select the tab to be open by default
+	document.getElementById("defaultOpen").click();
+	
+	function onCheckedColor()
+	{
+		if (document.getElementById("colorLineCheck").checked == true)
+		{
+			document.getElementById("colorLineCheck").value = 'true';
+			document.getElementById("columnName").style.display = 'inline';
+			document.getElementById("condition").style.display = 'inline';
+			document.getElementById("conditionalValue").style.display = 'inline';
+			document.getElementById("conditionalColor").style.display = 'inline';
+		}
+		else
+		{
+			document.getElementById("colorLineCheck").value = 'false';
+			document.getElementById("columnName").style.display = 'none';
+			document.getElementById("condition").style.display = 'none';
+			document.getElementById("conditionalValue").style.display = 'none';
+			document.getElementById("conditionalColor").style.display = 'none';
+		}
+	}
+	
+	function univariateEnableFilter()
+	{
+		if (document.getElementById("univariateSQLoption").checked == true)
+		{
+			document.getElementById("univariateSQLfilter").disabled = false;
+			document.getElementById("univariateSQLoption").value = 'true';
+			document.getElementById("univariateSQLfilter").style.display = 'inline';
+			document.getElementById("univariateSQLlabel").style.display = 'inline';
+		}
+		else
+		{
+			document.getElementById("univariateSQLfilter").disabled = true;
+			document.getElementById("univariateSQLoption").value = 'false';
+			document.getElementById("univariateSQLfilter").style.display = 'none';
+			document.getElementById("univariateSQLlabel").style.display = 'none';
+		}
+	}
+	
+	function multivariateEnableFilter()
+	{
+		if (document.getElementById("multivariateSQLoption").checked == true)
+		{
+			document.getElementById("multivariateSQLfilter").disabled = false;
+			document.getElementById("multivariateSQLoption").value = 'true';
+			document.getElementById("multivariateSQLfilter").style.display = 'inline';
+			document.getElementById("multivariateSQLlabel").style.display = 'inline';
+		}
+		else
+		{
+			document.getElementById("multivariateSQLfilter").disabled = true;
+			document.getElementById("multivariateSQLoption").value = 'false';
+			document.getElementById("multivariateSQLfilter").style.display = 'none';
+			document.getElementById("multivariateSQLlabel").style.display = 'none';
+		}
+	}
+
+	function geoEnableFilter()
+	{
+		if (document.getElementById("geoSQLoption").checked == true)
+		{
+			document.getElementById("geoSQLfilter").disabled = false;
+			document.getElementById("geoSQLoption").value = 'true';
+			document.getElementById("geoSQLfilter").style.display = 'inline';
+			document.getElementById("geoSQLlabel").style.display = 'inline';
+		}
+		else
+		{
+			document.getElementById("geoSQLfilter").disabled = true;
+			document.getElementById("geoSQLoption").value = 'false';
+			document.getElementById("geoSQLfilter").style.display = 'none';
+			document.getElementById("geoSQLlabel").style.display = 'none';
+		}
+	}
+	
+	function scatterplotEnableFilter()
+	{
+		if (document.getElementById("scatterplotSQLoption").checked == true)
+		{
+			document.getElementById("scatterplotSQLfilter").disabled = false;
+			document.getElementById("scatterplotSQLoption").value = 'true';
+			document.getElementById("scatterplotSQLfilter").style.display = 'inline';
+			document.getElementById("scatterplotSQLlabel").style.display = 'inline';
+		}
+		else
+		{
+			document.getElementById("scatterplotSQLfilter").disabled = true;
+			document.getElementById("scatterplotSQLoption").value = 'false';
+			document.getElementById("scatterplotSQLfilter").style.display = 'none';
+			document.getElementById("scatterplotSQLlabel").style.display = 'none';
+		}
+	}
+	
+	function bivariateEnableFilter()
+	{
+		if (document.getElementById("bivariateSQLoption").checked == true)
+		{
+			document.getElementById("bivariateSQLfilter").disabled = false;
+			document.getElementById("bivariateSQLoption").value = 'true';
+			document.getElementById("bivariateSQLfilter").style.display = 'inline';
+			document.getElementById("bivariateSQLlabel").style.display = 'inline';
+		}
+		else
+		{
+			document.getElementById("bivariateSQLfilter").disabled = true;
+			document.getElementById("bivariateSQLoption").value = 'false';
+			document.getElementById("bivariateSQLfilter").style.display = 'none';
+			document.getElementById("bivariateSQLlabel").style.display = 'none';
+		}
+	}
+	
+	function geoSubmit()
+	{
+		var geoFile = document.getElementById("geoFile").value;
+		document.getElementById('geoSubmit').innerHTML = '<h3>Map is rendering<br>Please wait as this can take several minutes</h3>';
+	}
+
+	// Tab operation
+	function openTab(evt, geoType) 
+	{
+	    var i, tabcontent, tablinks;
+
+	    // Get all elements with class="tabcontent" and hide them
+	    tabcontent = document.getElementsByClassName("tabcontent");
+	    for (i = 0; i < tabcontent.length; i++) {
+	        tabcontent[i].style.display = "none";
+	    }
+
+	    // Get all elements with class="tablinks" and remove the class "active"
+	    tablinks = document.getElementsByClassName("tablinks");
+	    for (i = 0; i < tablinks.length; i++) {
+	        tablinks[i].className = tablinks[i].className.replace(" active", "");
+	    }
+
+	    // Show the current tab, and add an "active" class to the button that opened the tab
+	    document.getElementById(geoType).style.display = "block";
+	    evt.currentTarget.className += " active";
+	}
+	</script>
+</html>
